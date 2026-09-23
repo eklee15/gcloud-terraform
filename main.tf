@@ -1,5 +1,5 @@
 provider "google" {
-  project     = "YOUR_PROJECT_ID"
+  project     = "csci-ga-3033-085"
   region      = "us-east4"
 }
 resource "google_compute_network" "vpc_network" {
@@ -24,7 +24,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-12"
     }
   }
 
