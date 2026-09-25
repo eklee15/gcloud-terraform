@@ -25,7 +25,7 @@ resource "google_compute_instance" "example" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-12"
     }
   }
 
@@ -43,7 +43,8 @@ resource "google_compute_instance" "example" {
 
   // Create a new SSH user and add their public key
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file("${var.ssh_key}")}"
+    ssh-keys                = "${var.ssh_user}:${file("${var.ssh_key}")}"
+    enable-guest-attributes = "TRUE"
   }
 }
 

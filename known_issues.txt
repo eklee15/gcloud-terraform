@@ -1,0 +1,47 @@
+known_issues.txt — defects and redundancies in gcloud-terraform
+================================================================
+Items that block a first-time lab run stay in README.md ("Setup gotchas").
+Everything below is secondary: hygiene, security posture, consistency, or
+maintainability. Safe to ignore while completing Track A or Track B.
+
+Security and local hygiene
+--------------------------
+1. Open ingress. SSH and Flask firewall rules use source_ranges 0.0.0.0/0.
+   The Flask rule has no target_tags, so it applies broadly on that VPC.
+
+2. cluster.inventory is created with file_permission 0666 (world-writable).
+   Prefer 0600.
+
+3. app.py uses the Flask development server (app.run(host='0.0.0.0')).
+   Acceptable for the lab; not a production deployment pattern.
+
+4. No .gitignore for .terraform/, *.tfstate*, key.json, or generated
+   cluster.inventory. Easy to commit secrets or state by mistake.
+
+5. Track B credentials = file("key.json") encourages long-lived key files
+   on disk. Prefer Application Default Credentials when possible; never
+   commit the key.
+
+Cross-track inconsistency and redundancy
+----------------------------------------
+6. Two divergent Terraform stacks. Root main.tf builds a custom VPC;
+   ansible/vpc.tf uses the default network despite the filename. Machine
+   types also differ (f1-micro vs n1-standard-1). Merging the tracks
+   without redesign will fail in confusing ways.
+
+7. Dead commented network_interface block in ansible/vpc.tf duplicates the
+   live block below it.
+
+8. ansible/clusterinventory.tpl receives server_private_ip from Terraform
+   but never references it; inventory SSH uses the public IP only.
+
+9. No shared pipeline: Ansible package install and the Flask app are not
+    wired together. There is no single apply that yields a configured,
+    listening HTTP endpoint.
+
+10. Root module has no required_providers / required_version; provider
+    versions are unconstrained at the repo root.
+
+11. Generic resource names (default, example-*) collide cognitively with
+    GCP's "default" network and make terraform state harder to read when
+    experimenting with both tracks.
